@@ -26,4 +26,22 @@ MATCH p=(n:Word {name:"crash"})--() RETURN p LIMIT 25;
 match (c1:CharAtPos {idx:0, char:'c'}), (c5:CharAtPos {idx:4, char:'h'})
 match (c:CharAtPos {char:'a'})
 match (w:Word)-[:HAS]->(c1),(w)-[:HAS]->(c5),(w)-[:HAS]->(c)
-return w.name
+return w.name;
+
+/*
+╒════════╕
+│"w.name"│
+╞════════╡
+│"clach" │
+├────────┤
+│"clash" │
+├────────┤
+│"caneh" │
+├────────┤
+│"coach" │
+├────────┤
+│"catch" │
+├────────┤
+│"crash" │
+└────────┘
+*/
