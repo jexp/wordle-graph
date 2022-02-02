@@ -150,7 +150,7 @@ WHERE not exists { (wordle)-[:POS1]->(a) }
   AND not exists { (wordle)-[:POS3]->(:Char {char:'i'}) }
 RETURN *;
 ----
-image::wordle-model-exclusions.png[]
+image::wordle-rel-model-exclusions.png[]
 
 
 === Ideas
