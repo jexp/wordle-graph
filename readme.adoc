@@ -1,0 +1,10 @@
+* explain two models
+* loading
+* post-processing
+* look at char frequencies
+* recommend starting words (based on top frequencies)
+* rarest words
+* solve word
+* visualize solver
+
+* implement wordle -> split input + match
