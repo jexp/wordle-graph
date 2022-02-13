@@ -163,5 +163,6 @@ image::wordle-rel-model-exclusions.png[]
 * rarest words
 * solve word
 * visualize solver
+* input word so far, e.g. `Ca!l!iH` and have a generic cypher-statement to run with this word
 
 * implement wordle -> split input + match
