@@ -60,4 +60,80 @@ match (c1:CharAtPos {idx:0, char:'c'}), // correct
 match (w:Word)-[h1:HAS]->(c1),
       (w)-[h2:HAS]->(c5), (w)-[h3:HAS]->(c)
 WHERE not exists { (w)-[:HAS]->(c2) } and not exists { (w)-[:HAS]->(c3) } and not exists { (w)-[:HAS]->(c4) }
-return *
+return *;
+
+
+WITH [{char:'c',match:true},{char:'a'},{char:'l',match:false},{char:'i',match:false},{char:'h',match:true}] as input
+MATCH (w:Word)
+WHERE all(idx in range(0,size(input)-1) WHERE
+   case input[idx].match
+   when true then exists { (w)-[:HAS]->(:CharAtPos {idx:idx, char:char}) }
+   when false then not exists { (w)-[:HAS]->(:CharAtPos {char:char}) }
+   else exists { (w)-[:HAS]->(:CharAtPos {char:char}) }
+   end
+)
+RETURN w.word;
+
+WITH [{char:'c',match:true},{char:'a'},{char:'l',match:false},{char:'i',match:false},{char:'h',match:true}] as input
+MATCH (w:Word)
+CALL { WITH input, w
+      UNWIND range(0,size(input)-1) as idx
+      WITH size(input) as total, idx, w, input[idx].match as m, input[idx].char as char
+      WHERE (m AND exists { (w)-[:HAS]->(:CharAtPos {idx:idx, char:char}) })
+      OR (m = false AND NOT exists { (w)-[:HAS]->(:CharAtPos {char:char}) })
+      OR (m IS NULL AND exists { (w)-[:HAS]->(:CharAtPos {char:char}) })
+      WITH total, count(*) as count WHERE count = total
+      RETURN true as found
+}
+RETURN w.name;
+
+
+WITH [{char:'c',match:true},{char:'a'},{char:'l',match:false},{char:'i',match:false},{char:'h',match:true}] as input
+MATCH (w:Word)
+WHERE all(idx in range(0,size(input)-1) WHERE
+   case input[idx].match
+   when true then exists { (w)-[:HAS]->(:CharAtPos {idx:idx, char:char}) }
+   when false then not exists { (w)-[:HAS]->(:CharAtPos {char:char}) }
+   else exists { (w)-[:HAS]->(:CharAtPos {char:char}) }
+   end
+)
+RETURN w.word;
+
+
+WITH 'C a l! i! H' AS input
+WITH split(input,' ') as parts
+UNWIND range(0,size(parts)-1) as idx
+WITH idx, 
+     toLower(substring(parts[idx],0,1)) as char, 
+     parts[idx] ends with '!' as exclude,
+     toUpper(substring(parts[idx],0,1)) = substring(parts[idx],0,1) as correct
+
+MATCH (w:Word)
+WHERE correct AND exists { (w)-[:HAS]->(c:CharAtPos {idx:idx, char:char}) }
+OR NOT correct AND exclude and NOT exists { (w)-[:HAS]->(c:CharAtPos {char:char}) }
+OR NOT correct AND NOT exclude AND exists { (w)-[:HAS]->(c:CharAtPos {char:char}) }
+
+RETURN w.name;
+
+
+Words with duplicate letters
+
+MATCH (c1:CharAtPos)<--(w)-->(c2:CharAtPos) 
+
+WHERE c1.char = c2.char and c1<>c2
+RETURN count(distinct w)
+
+// 4650
+
+match path = (:Word {name:"diver"})-->()
+return path
+
+
+
+match (w:Word) with w skip $word limit 1
+with split($guess,'') as guessed, split(w.name,'') as letters, w.name as name
+return reduce(res="", idx in range(0,size(letters)-1) | 
+res + case 
+when guessed[idx] = letters[idx] then '🟩' 
+when name contains guessed[idx] then '🟨'
+else '⬜' end) as res

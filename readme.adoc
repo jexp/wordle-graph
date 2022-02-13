@@ -153,6 +153,35 @@ RETURN *;
 image::wordle-rel-model-exclusions.png[]
 
 
+=== Playing wordle in your Terminal
+
+If you just want to play, run `./wordle-neo4j.sh` in your terminal, it sends a Cypher query to a wordle database in demo.neo4j.labs.com (username, password, database = wordle) to see if your guesses were right.
+
+[source,shell]
+----
+./wordle-neo4j.sh 
+Guess 1: diver
+🟨⬜⬜🟩🟩
+Guess 2: later
+🟨⬜⬜🟩🟩
+Guess 3: elder
+🟩🟩🟩🟩🟩
+Guessed "elder" aka 🟩🟩🟩🟩🟩 in 3 rounds.
+----
+
+The statement that's running is:
+
+[source,cypher]
+----
+match (w:Word) 
+with w skip $word limit 1 
+with split($guess,'') as guessed, split(w.name,'') as letters, w.name as name 
+return reduce(res='', idx in range(0,size(letters)-1) | res + 
+  case when guessed[idx] = letters[idx] then '🟩' 
+  when name contains guessed[idx] then '🟨'
+  else '⬜' end) as res
+----
+
 === Ideas
 
 * explain two models
@@ -163,6 +192,6 @@ image::wordle-rel-model-exclusions.png[]
 * rarest words
 * solve word
 * visualize solver
-* input word so far, e.g. `Ca!l!iH` and have a generic cypher-statement to run with this word
+* input word so far, e.g. `C a l! i! H` and have a generic cypher-statement to run with this word
 
 * implement wordle -> split input + match
